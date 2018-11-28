@@ -39,8 +39,19 @@ public class Bean {
      */
     public ArrayList<DataModel> getHist(String muid) {
         ArrayList<DataModel> result = new ArrayList<>();
+        getData(muid, result, SQL_STRING);
+        return result;
+    }
+
+    /**
+     * Метод которы выгружает данные из базы
+     * @param muid идентификационный номер объекта
+     * @param result коллекция результатов
+     * @param sqlString sql строка запроса
+     */
+    private void getData(String muid, ArrayList<DataModel> result, String sqlString) {
         try(Connection connect = ds.getConnection();
-                PreparedStatement pst = connect.prepareStatement(SQL_STRING)) {
+            PreparedStatement pst = connect.prepareStatement(sqlString)) {
             pst.setString(1, muid);
             ResultSet res = pst.executeQuery();
             while(res.next()) {
@@ -48,11 +59,9 @@ public class Bean {
                                 res.getString(2), res.getString(3),
                                 res.getString(4)));
             }
-
         } catch(SQLException e) {
             e.printStackTrace();
         }
-        return result;
     }
 
     /**
@@ -84,22 +93,7 @@ public class Bean {
                 e.printStackTrace();
             }
 
-            try(Connection connect = ds.getConnection();
-                PreparedStatement pstm = connect.prepareStatement(SQL_STRING_INST)) {
-                pstm.setString(1, id);
-
-                ResultSet res = pstm.executeQuery();
-                while(res.next()) {
-                    result.add(new DataModel(res.getString(1),
-                            res.getString(2),
-                            res.getString(3),
-                            res.getString(4)));
-                }
-
-                System.out.println("");
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
+            getData(id, result, SQL_STRING_INST);
 
             if (!result.isEmpty()) {
                 break;
