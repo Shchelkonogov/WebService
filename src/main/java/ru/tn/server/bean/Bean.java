@@ -50,6 +50,8 @@ public class Bean {
     private static final String SQL_GET_USER = "select client_name from iasdtu_clients";
     private static final String SQL_DELETE_SUBS = "delete from iasdtu_subscr " +
             "where client_id = (select client_id from iasdtu_clients where client_name = ?)";
+    private static final String SQL_CHECK_SUB = "select count(*) from IASDTU_SUBSCR " +
+            "where client_id = (select client_id from IASDTU_CLIENTS where client_name = ?)";
 
     /**
      * Получение исторических данных по заданному объекту
@@ -277,6 +279,28 @@ public class Bean {
         } catch(SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Метод проверяет существуют ли подписанные объекту у пользователя
+     * @param clientName пользователь
+     * @return статус
+     */
+    public boolean checkSub(String clientName) {
+        try(Connection connect = ds.getConnection();
+            PreparedStatement stm = connect.prepareStatement(SQL_CHECK_SUB)) {
+            stm.setString(1, clientName);
+
+            ResultSet res = stm.executeQuery();
+            if(res.next()) {
+                if(res.getInt(1) != 0) {
+                    return true;
+                }
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**

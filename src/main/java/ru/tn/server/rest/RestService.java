@@ -14,6 +14,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,6 +53,23 @@ public class RestService {
             return Response.accepted().build();
         }
         return Response.serverError().build();
+    }
+
+
+    /**
+     * Сервис проверки подписки
+     * @param name пользователь
+     * @return статус подписки
+     */
+    @POST
+    @Path("/checkSub")
+    public Response checkSub(@QueryParam("clientName") String name) {
+        System.out.println("RestService.checkSub");
+        if(bean.checkSub(name)) {
+            return Response.ok().build();
+        } else {
+            return Response.serverError().build();
+        }
     }
 
     /**
@@ -101,9 +119,9 @@ public class RestService {
     /*@POST
     @Path("/test")
     @Consumes("application/json")
-    public Response testSend(List<CondDataModel> model) {
+    public Response testSend(String model) {
         System.out.println("Catch result data!");
-        model.forEach(item -> System.out.println(item.getMuid() + " " + item.getCond()));
+        System.out.println(model);
 //        return Response.ok().build();
         return Response.serverError().build();
     }
@@ -126,6 +144,15 @@ public class RestService {
         System.out.println("RestService.test status: " + resp.getStatus());
 
         client.close();
+
+//        Client client = ClientBuilder.newClient();
+//
+//        WebTarget target = client.target(schedule.getUrl() + "checkSub");
+//        Response resp = target.queryParam("clientName", "IASDTU_6").request().method("POST");
+//        System.out.println("RestService.test checkSub status: " + resp.getStatus());
+//
+//        client.close();
+
         return null;
     }*/
 
