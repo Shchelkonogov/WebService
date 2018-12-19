@@ -1,4 +1,4 @@
-package ru.tn.server;
+package ru.tn.server.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.tn.server.bean.Bean;
