@@ -56,7 +56,7 @@ public class BeanSchedule {
         }
 
         for(Map.Entry item: clients.entrySet()) {
-            System.out.println(item.getKey() + " " + item.getValue());
+            System.out.println("BeanSchedule.checkUser errors for user: " + item.getKey() + " count: " + item.getValue());
         }
     }
 
