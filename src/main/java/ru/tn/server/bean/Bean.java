@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * Bean для получения данных из базы
@@ -301,7 +302,7 @@ public class Bean {
      * Асинхронный что бы не бокировать Schedule bean
      */
     @Asynchronous
-    public void send() {
+    public Future<Void> send() {
         for (String item: getClient()) {
             System.out.println(item);
             Client client = ClientBuilder.newClient();
@@ -313,5 +314,6 @@ public class Bean {
 
             client.close();
         }
+        return null;
     }
 }
