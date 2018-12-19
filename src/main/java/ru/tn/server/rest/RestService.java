@@ -17,6 +17,9 @@ import javax.ws.rs.core.*;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * RestFull сервис
+ */
 @Path("/")
 public class RestService {
 
@@ -26,6 +29,13 @@ public class RestService {
     @EJB
     private BeanSchedule schedule;
 
+    /**
+     * Метод подписки объектов пользователя
+     * @param model модель данных подписки
+     * @return статус подписки <br>
+     *     202 - успешная подписка <br>
+     *     500 - ошибка на сервере
+     */
     @POST
     @Path("/subscription")
     @Consumes("application/json")
@@ -44,6 +54,11 @@ public class RestService {
         return Response.serverError().build();
     }
 
+    /**
+     * Метод отсылает сосятояния подписаных объектов пользователя
+     * @param name пользователь
+     * @return статус отправки
+     */
     @POST
     @Path("/send")
     public Response send(@QueryParam("clientName") String name) {
@@ -114,6 +129,11 @@ public class RestService {
         return null;
     }*/
 
+    /**
+     * Метод инициализирует сервис
+     * @param info метаданные
+     * @return статус
+     */
     @GET
     @Path("/run")
     public Response start(@Context UriInfo info) {
