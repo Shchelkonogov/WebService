@@ -3,11 +3,12 @@ package ru.tn.server.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.xml.bind.annotation.*;
+import java.io.Serializable;
 
 /**
  * Модель данный для json
  */
-public class DataModel {
+public class DataModel implements Serializable {
 
     @XmlElement(name = "Par_name")
     private String parMemo;
@@ -21,11 +22,18 @@ public class DataModel {
     @XmlElement(name = "Par_value")
     private String value;
 
-    public DataModel(String parMemo, String parDesc, String date, String value) {
+    @XmlElement(name = "Condition")
+    private String cond;
+
+    public DataModel() {
+    }
+
+    public DataModel(String parMemo, String parDesc, String date, String value, String cond) {
         this.parMemo = parMemo;
         this.parDesc = parDesc;
         this.date = date;
         this.value = value;
+        this.cond = cond;
     }
 
     @JsonProperty("Par_name")
@@ -68,14 +76,23 @@ public class DataModel {
         this.value = value;
     }
 
+    @JsonProperty("Condition")
+    public String getCond() {
+        return cond;
+    }
+
+    @JsonProperty("Condition")
+    public void setCond(String cond) {
+        this.cond = cond;
+    }
+
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("DataModel{");
-        sb.append("parMemo='").append(parMemo).append('\'');
-        sb.append(", parDesc='").append(parDesc).append('\'');
-        sb.append(", date='").append(date).append('\'');
-        sb.append(", value='").append(value).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "DataModel{" + "parMemo='" + parMemo + '\'' +
+                ", parDesc='" + parDesc + '\'' +
+                ", date='" + date + '\'' +
+                ", value='" + value + '\'' +
+                ", cond='" + cond + '\'' +
+                '}';
     }
 }
