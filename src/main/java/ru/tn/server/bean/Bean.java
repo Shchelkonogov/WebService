@@ -264,24 +264,6 @@ public class Bean {
     }
 
     /**
-     * Метод возвращает коллекцию клиентов
-     * @return коллекция
-     */
-    public List<String> getClient() {
-        List<String> result = new ArrayList<>();
-        try(Connection connect = ds.getConnection();
-                PreparedStatement stm = connect.prepareStatement(SQL_GET_USER)) {
-            ResultSet res = stm.executeQuery();
-            while(res.next()) {
-                result.add(res.getString(1));
-            }
-        } catch(SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
      * Метод удаляет подписанные объекты пользователя по имени клиента
      * @param client клиент
      */
@@ -303,8 +285,18 @@ public class Bean {
      */
     @Asynchronous
     public Future<Void> send() {
-        for (String item: getClient()) {
-            System.out.println(item);
+        List<String> clients = new ArrayList<>();
+        try(Connection connect = ds.getConnection();
+            PreparedStatement stm = connect.prepareStatement(SQL_GET_USER)) {
+            ResultSet res = stm.executeQuery();
+            while(res.next()) {
+                clients.add(res.getString(1));
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+        for (String item: clients) {
+            System.out.println("Bean.send client: " + item);
             Client client = ClientBuilder.newClient();
             WebTarget target = client.target(schBean.getUrl() + "send");
 
