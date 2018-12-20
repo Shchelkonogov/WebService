@@ -1,6 +1,7 @@
 package ru.tn.server.model;
 
 import javax.json.bind.annotation.JsonbTransient;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class CondDataModel implements Serializable {
     private long muid;
     private List<Integer> cond;
 
+    @XmlTransient
     @JsonbTransient
     private String maxTimeStamp;
 
@@ -61,10 +63,12 @@ public class CondDataModel implements Serializable {
      * Возвращает максимальное время по состоянию
      * @return время
      */
+    @XmlTransient
     public String getMaxTimeStamp() {
         return maxTimeStamp;
     }
 
+    @XmlTransient
     public void setMaxTimeStamp(String maxTimeStamp) {
         this.maxTimeStamp = maxTimeStamp;
     }

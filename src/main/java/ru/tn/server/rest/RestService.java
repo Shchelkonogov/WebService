@@ -14,7 +14,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -116,6 +115,32 @@ public class RestService {
         return Response.ok().build();
     }
 
+    /*@POST
+    @Path("/send1")
+    @Produces("application/json")
+    public Response send1(@QueryParam("clientName") String name) {
+        System.out.println("RestService.send clientName: " + name);
+
+        List<CondDataModel> model = bean.getData(name);
+
+        if (!model.isEmpty()) {
+
+            try {
+
+
+                GenericEntity<List<CondDataModel>> modelWrapper = new GenericEntity<List<CondDataModel>>(model){};
+
+                //Response resp = target.request().post(Entity.entity(modelWrapper, MediaType.APPLICATION_JSON));
+                return Response.ok().entity(modelWrapper).build();
+            } catch(Exception e) {
+
+
+            }
+        }
+
+        return Response.ok().build();
+    }
+*/
     /*@POST
     @Path("/test")
     @Consumes("application/json")
