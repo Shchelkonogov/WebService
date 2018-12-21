@@ -63,7 +63,7 @@ public class RestService {
     @POST
     @Path("/checkSub")
     public Response checkSub(@QueryParam("clientName") String name) {
-        System.out.println("RestService.checkSub");
+        System.out.println("RestService.checkSub clientName: " + name);
         if(bean.checkSub(name)) {
             return Response.ok().build();
         } else {

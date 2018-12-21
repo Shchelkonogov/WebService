@@ -287,6 +287,7 @@ public class Bean {
      * @return статус
      */
     public boolean checkSub(String clientName) {
+        System.out.println("Bean.checkSub client: " + clientName);
         try(Connection connect = ds.getConnection();
             PreparedStatement stm = connect.prepareStatement(SQL_CHECK_SUB)) {
             stm.setString(1, clientName);
@@ -294,12 +295,14 @@ public class Bean {
             ResultSet res = stm.executeQuery();
             if(res.next()) {
                 if(res.getInt(1) != 0) {
+                    System.out.println("Bean.checkSub ok sub");
                     return true;
                 }
             }
         } catch(SQLException e) {
             e.printStackTrace();
         }
+        System.out.println("Bean.checkSub no sub");
         return false;
     }
 
