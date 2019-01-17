@@ -25,6 +25,8 @@ public class ServletHistData extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("ServletHistData load");
+
         String value = request.getParameter("muid");
 
         ObjectMapper mapper = new ObjectMapper();
