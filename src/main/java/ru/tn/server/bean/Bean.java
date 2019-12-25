@@ -12,15 +12,18 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * Bean для получения данных из базы
  */
 @Stateless
 public class Bean {
+
+    private static Set<String> muidStatistic = ConcurrentHashMap.newKeySet();
 
     @EJB
     private BeanSchedule schBean;
@@ -52,6 +55,11 @@ public class Bean {
             "where client_id = (select client_id from iasdtu_clients where client_name = ?)";
     private static final String SQL_CHECK_SUB = "select count(*) from IASDTU_SUBSCR " +
             "where client_id = (select client_id from IASDTU_CLIENTS where client_name = ?)";
+
+    private static final String SQL_STATISTIC = "select get_obj_filial(obj_id), count(*) from obj_object where obj_id in ( " +
+            "select id_aspid from gis_object where id_gis in (?)) " +
+            "group by get_obj_filial(obj_id) " +
+            "order by to_number(replace(get_obj_filial(obj_id),'Филиал ',''))";
 
     /**
      * Получение исторических данных по заданному объекту
@@ -334,5 +342,39 @@ public class Bean {
             client.close();
         }
         return null;
+    }
+
+    /**
+     * Добавляем muid в статистику
+     * @param muid asot muid
+     */
+    public void addMuidToStatistic(String muid) {
+        muidStatistic.add(muid);
+    }
+
+    /**
+     * Метод очищает статистику
+     */
+    public void clearStatistic() {
+        muidStatistic.clear();
+    }
+
+    public Map<String, String> getStatistic() {
+        Map<String, String> result = new LinkedHashMap<>();
+
+        String muids = muidStatistic.stream().map(s -> "'" + s + "'").collect(Collectors.joining(", "));
+
+        try (Connection connect = ds.getConnection();
+             PreparedStatement stm = connect.prepareStatement(SQL_STATISTIC.replace("?", muids))) {
+            ResultSet res = stm.executeQuery();
+
+            while (res.next()) {
+                result.put(res.getString(1), res.getString(2));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

@@ -37,6 +37,14 @@ public class BeanSchedule {
     }
 
     /**
+     * Schedule метод который каждый час очищает статистику по обращениям
+     */
+    @Schedule(hour = "*", persistent = false)
+    private void clearStatistic() {
+        bean.clearStatistic();
+    }
+
+    /**
      * Метод проверки как часто происходила ошибка доставки данных
      * Если 15 раз не доставили данные то подпись стирается
      * @param client клиент

@@ -29,6 +29,8 @@ public class ServletHistData extends HttpServlet {
 
         String value = request.getParameter("muid");
 
+        bean.addMuidToStatistic(value);
+
         ObjectMapper mapper = new ObjectMapper();
 
         response.setContentType("text/html; charset=UTF-8");

@@ -14,6 +14,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -113,6 +115,34 @@ public class RestService {
         }
 
         return Response.ok().build();
+    }
+
+    @GET
+    @Path("/statistic")
+    @Produces("text/html")
+    public String getStatistic() {
+        LocalDateTime time = LocalDateTime.now();
+        StringBuilder sb = new StringBuilder("<html>")
+                .append("<head>")
+                .append("<meta charset=\"utf-8\">")
+                .append("</head>")
+                .append("<body>")
+                .append("<div style=\"text-align: center; font-weight: bold;\">")
+                .append("Статистика работы сервиса экранов коллективного доступа")
+                .append("</div>")
+                .append("<div style=\"text-align: center;\">")
+                .append(" c ")
+                .append(time.withMinute(0).withSecond(0).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")))
+                .append(" по ")
+                .append(time.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")))
+                .append("</div>")
+                .append("<br>")
+                .append("<div style=\"text-align: center;\">");
+
+        bean.getStatistic().forEach((k, v) -> sb.append(k).append(": \t\t").append(v).append("<br>"));
+
+        sb.append("</div>").append("</body>").append("</html>");
+        return sb.toString();
     }
 
     /*@POST

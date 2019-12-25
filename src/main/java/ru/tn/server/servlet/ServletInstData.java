@@ -27,6 +27,8 @@ public class ServletInstData extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String value = request.getParameter("muid");
 
+        bean.addMuidToStatistic(value);
+
         ObjectMapper mapper = new ObjectMapper();
 
         response.setContentType("text/html; charset=UTF-8");
