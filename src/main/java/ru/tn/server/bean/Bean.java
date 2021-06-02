@@ -174,6 +174,8 @@ public class Bean {
                 System.out.println("Bean.subscript delete");
                 stmProcCall.executeBatch();
                 System.out.println("Bean.subscript procedure call");
+            } else {
+                return false;
             }
         } catch(SQLException e) {
             e.printStackTrace();
