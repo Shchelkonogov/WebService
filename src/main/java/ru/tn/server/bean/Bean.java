@@ -2,6 +2,7 @@ package ru.tn.server.bean;
 
 import ru.tn.server.model.CondDataModel;
 import ru.tn.server.model.DataModel;
+import ru.tn.server.model.PassportData;
 import ru.tn.server.model.SubscriptModel;
 
 import javax.annotation.Resource;
@@ -15,6 +16,8 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -23,6 +26,8 @@ import java.util.stream.Collectors;
 @Stateless
 public class Bean {
 
+    private static final Logger LOGGER = Logger.getLogger(Bean.class.getName());
+
     private static Set<String> muidStatistic = ConcurrentHashMap.newKeySet();
 
     @EJB
@@ -30,6 +35,8 @@ public class Bean {
 
     @Resource(name = "OracleDataSource", mappedName = "jdbc/OracleDataSource")
     private DataSource ds;
+
+    private static final String ALTER_SESSION = "alter session set NLS_NUMERIC_CHARACTERS='.,'";
 
     private static final String SQL_STRING = "select n1, n2, n3, n4, n5 from table (iasdtu.get_hist_data(?))";
     private static final String SQL_STRING_INST = "select n1, n2, n3, n4, n5 from table (iasdtu.get_async_data(?))";
@@ -60,6 +67,8 @@ public class Bean {
             "select id_aspid from gis_object where id_gis in (?)) " +
             "group by get_obj_filial(obj_id) " +
             "order by to_number(replace(get_obj_filial(obj_id),'Филиал ',''))";
+
+    private static final String SELECT_PASSPORT_DATA = "select prop_name, prop_value, prop_type from table(iasdtu.get_obj_props(?, ?))";
 
     /**
      * Получение исторических данных по заданному объекту
@@ -377,6 +386,32 @@ public class Bean {
             e.printStackTrace();
         }
 
+        return result;
+    }
+
+    /**
+     * Получение паспортных данных объекта
+     * @param sid объекта
+     * @param mType тип объекта
+     * @return коллекция паспортной информации
+     */
+    public List<PassportData> getPassportData(long sid, int mType) {
+        List<PassportData> result = new ArrayList<>();
+        try (Connection connect = ds.getConnection();
+             PreparedStatement alterSession = connect.prepareStatement(ALTER_SESSION);
+             PreparedStatement stm = connect.prepareStatement(SELECT_PASSPORT_DATA)) {
+            alterSession.executeQuery();
+
+            stm.setLong(1, sid);
+            stm.setInt(2, mType);
+
+            ResultSet res = stm.executeQuery();
+            while (res.next()) {
+                result.add(new PassportData(res.getString("prop_name"), res.getString("prop_value"), res.getString("prop_type")));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "error load passport data", e);
+        }
         return result;
     }
 }

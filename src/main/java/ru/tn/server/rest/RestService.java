@@ -16,6 +16,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -143,6 +144,32 @@ public class RestService {
 
         sb.append("</div>").append("</body>").append("</html>");
         return sb.toString();
+    }
+
+    /**
+     * Get метод для получения паспортной информации об объекте
+     * @param sid объекта
+     * @param mType тип объекта
+     * @return http ответ ввиде json
+     */
+    @GET
+    @Path("/Get_Passport_Data")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPassportData(@QueryParam("sid") String sid, @QueryParam("mtype") String mType) {
+        try {
+            Jsonb jsonb = JsonbBuilder.create();
+
+            List<Integer> checkTypeList = Arrays.asList(1, 303, 343, 283);
+            int type = Integer.parseInt(mType);
+            if (!checkTypeList.contains(type)) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            return Response.ok(jsonb.toJson(bean.getPassportData(Long.parseLong(sid), type))).build();
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 
     /*@POST
