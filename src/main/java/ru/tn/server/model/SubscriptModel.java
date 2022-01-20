@@ -1,11 +1,13 @@
 package ru.tn.server.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * Модель данных для подписи объектов пользователя
  */
+@XmlRootElement()
 public class SubscriptModel implements Serializable {
 
     private String controlId;
