@@ -51,8 +51,13 @@ public class Bean {
             "from iasdtu_clients where client_name = ?)";
     private static final String SQL_SELECT_MAX_TIME_STAMP = "select to_char(max(time_stamp), 'dd.mm.yyyy hh24:mi:ss') " +
             "from iasdtu_data where muid = ?";
-    private static final String SQL_SELECT_COND = "select cond from iasdtu_data where muid = ? " +
-            "and time_stamp <= to_date(?, 'dd.mm.yyyy hh24:mi:ss') order by time_stamp, id";
+    private static final String SQL_SELECT_COND = "select cond, decode(val, 'ДА' , 1, 0) " +
+            "from iasdtu_data a, obj_type_prop_val_vie b " +
+                "where muid = ? " +
+                    "and time_stamp <= to_date(?, 'dd.mm.yyyy hh24:mi:ss') " +
+                    "and obj_prop_id = 60 " +
+                    "and a.obj_id = b.obj_id " +
+            "order by time_stamp, id";
 
     private static final String SQL_DELETE_COND = "delete from iasdtu_data where time_stamp <= to_date(?, 'dd.mm.yyyy hh24:mi:ss') " +
             "and muid = ?";
@@ -88,8 +93,11 @@ public class Bean {
      * @param sqlString sql строка запроса
      */
     private void getData(String muid, ArrayList<DataModel> result, String sqlString) {
-        try(Connection connect = ds.getConnection();
-            PreparedStatement pst = connect.prepareStatement(sqlString)) {
+        try (Connection connect = ds.getConnection();
+             PreparedStatement stmAlter = connect.prepareStatement(ALTER_SESSION);
+             PreparedStatement pst = connect.prepareStatement(sqlString)) {
+            stmAlter.execute();
+
             pst.setString(1, muid);
             ResultSet res = pst.executeQuery();
             while(res.next()) {
@@ -111,8 +119,8 @@ public class Bean {
     public ArrayList<DataModel> getInst(String muid) {
         ArrayList<DataModel> result = new ArrayList<>();
         String id = null;
-        try(Connection connect = ds.getConnection();
-                CallableStatement stm = connect.prepareCall("{? = call iasdtu.set_async_request(?)}")) {
+        try (Connection connect = ds.getConnection();
+             CallableStatement stm = connect.prepareCall("{? = call iasdtu.set_async_request(?)}")) {
             stm.setString(2, muid);
             stm.registerOutParameter(1, Types.VARCHAR);
             stm.execute();
@@ -228,7 +236,27 @@ public class Bean {
 
                 res = stmCond.executeQuery();
                 while(res.next()) {
-                    cond.add(res.getInt(1));
+                    String condValue = res.getString(2);
+                    switch (res.getInt(1)) {
+                        case 0 : {
+                            condValue = condValue + "0000001";
+                            break;
+                        }
+                        case 1 : {
+                            condValue = condValue + "0000010";
+                            break;
+                        }
+                        case 2 : {
+                            condValue = condValue + "0000100";
+                            break;
+                        }
+                        case 3 : {
+                            condValue = condValue + "0001000";
+                            break;
+                        }
+                    }
+
+                    cond.add((int) Short.parseShort(condValue, 2));
                 }
 
                 if (!cond.isEmpty()) {
