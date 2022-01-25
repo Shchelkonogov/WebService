@@ -17,6 +17,7 @@ import java.util.StringJoiner;
  */
 @Entity
 @Table(name = "FITTINGS", schema = "SCADA")
+@NamedQuery(name = "FittingEntity.byBrand", query = "select e from FittingsEntity e where e.brand = ?1")
 @XmlRootElement
 public class FittingsEntity {
 

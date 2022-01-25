@@ -4,7 +4,11 @@ import ru.tn.server.entity.TubesEntity;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Maksim Shchelkonogov
@@ -28,6 +32,10 @@ public class TestJson {
 
         TubesEntity tubesEntity = jsonb.fromJson(jsonTube, TubesEntity.class);
 
-        System.out.printf("json to object: %s", tubesEntity);
+        System.out.printf("json to object: %s%n", tubesEntity);
+
+        List<TubesEntity> tubesEntityList = Arrays.asList(tubes, tubesEntity);
+
+        System.out.println(jsonb.toJson(tubesEntityList));
     }
 }

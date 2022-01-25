@@ -10,6 +10,8 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +27,18 @@ public class ScadaSB {
 
     @PersistenceContext(unitName = "OracleDB")
     private EntityManager em;
+
+    public List<TubesEntity> getTubesByBrand(String brand) {
+        TypedQuery<TubesEntity> tubeByBrandQuery = em.createNamedQuery("TubesEntity.byBrand", TubesEntity.class);
+        tubeByBrandQuery.setParameter(1, brand);
+        return tubeByBrandQuery.getResultList();
+    }
+
+    public List<FittingsEntity> getFittingsByBrand(String brand) {
+        TypedQuery<FittingsEntity> fittingByBrandQuery = em.createNamedQuery("FittingEntity.byBrand", FittingsEntity.class);
+        fittingByBrandQuery.setParameter(1, brand);
+        return fittingByBrandQuery.getResultList();
+    }
 
     public TubesEntity getTubeByMuid(String muid) {
         return em.find(TubesEntity.class, muid);

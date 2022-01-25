@@ -12,6 +12,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +26,40 @@ public class ScadaService {
 
     @EJB
     private ScadaSB scadaBean;
+
+    @GET
+    @Path("/tubeByBrand")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTubeByBrand(@QueryParam("brand") String brand) {
+        LOGGER.log(Level.INFO, "get tube by brand {0}", brand);
+
+        List<TubesEntity> tubesByBrand = scadaBean.getTubesByBrand(brand);
+        if (!tubesByBrand.isEmpty()) {
+            LOGGER.log(Level.INFO, "find tubes {0}", tubesByBrand);
+            Jsonb jsonb = JsonbBuilder.create();
+            return Response.ok(jsonb.toJson(tubesByBrand)).build();
+        }
+
+        LOGGER.log(Level.INFO, "no tubes find for brand {0}", brand);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    @GET
+    @Path("/fittingByBrand")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFittingByBrand(@QueryParam("brand") String brand) {
+        LOGGER.log(Level.INFO, "get fitting by brand {0}", brand);
+
+        List<FittingsEntity> fittingsByBrand = scadaBean.getFittingsByBrand(brand);
+        if (!fittingsByBrand.isEmpty()) {
+            LOGGER.log(Level.INFO, "find fitting {0}", fittingsByBrand);
+            Jsonb jsonb = JsonbBuilder.create();
+            return Response.ok(jsonb.toJson(fittingsByBrand)).build();
+        }
+
+        LOGGER.log(Level.INFO, "no fitting find for brand {0}", brand);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
 
     @GET
     @Path("/entity")

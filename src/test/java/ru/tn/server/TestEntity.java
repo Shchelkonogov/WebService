@@ -3,10 +3,7 @@ package ru.tn.server;
 import ru.tn.server.entity.FittingsEntity;
 import ru.tn.server.entity.TubesEntity;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 /**
@@ -30,6 +27,10 @@ public class TestEntity {
 //
 //            entityManager.persist(tubes);
 
+            TypedQuery<TubesEntity> tubeByBrandQuery = entityManager.createNamedQuery("TubesEntity.byBrand", TubesEntity.class);
+            tubeByBrandQuery.setParameter(1, "truba60665");
+
+            System.out.println(tubeByBrandQuery.getResultList());
             System.out.println(entityManager.find(TubesEntity.class, "1dlWlqP2UvngVbeL9p1YoQ=="));
             System.out.println(entityManager.find(FittingsEntity.class, "1dlWlpGAUvngVbeL9p1YoQ=="));
 
