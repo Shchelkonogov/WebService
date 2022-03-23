@@ -183,6 +183,16 @@ public class FittingsEntity {
         this.timeStamp = timeStamp;
     }
 
+    @PrePersist
+    public void prePersist() {
+        this.timeStamp = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.timeStamp = LocalDateTime.now();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

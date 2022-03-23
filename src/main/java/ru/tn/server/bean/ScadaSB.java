@@ -73,9 +73,6 @@ public class ScadaSB {
         if (newTube.getStatus() != null) {
             tube.setStatus(newTube.getStatus());
         }
-        if (newTube.getTimeStamp() != null) {
-            tube.setTimeStamp(newTube.getTimeStamp());
-        }
 
         try {
             em.merge(tube);
@@ -163,9 +160,6 @@ public class ScadaSB {
         }
         if (newFitting.getClientId() != null) {
             fitting.setClientId(newFitting.getClientId());
-        }
-        if (newFitting.getTimeStamp() != null) {
-            fitting.setTimeStamp(newFitting.getTimeStamp());
         }
 
         try {
