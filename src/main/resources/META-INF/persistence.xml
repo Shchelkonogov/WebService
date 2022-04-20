@@ -4,7 +4,7 @@
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
              version="2.2">
 
-<!--    <persistence-unit name="default">-->
+<!--    <persistence-unit name="OracleDBLocal">-->
 
 <!--        <class>ru.tn.server.entity.FittingsEntity</class>-->
 <!--        <class>ru.tn.server.entity.TubesEntity</class>-->
@@ -18,16 +18,43 @@
 <!--        </properties>-->
 <!--    </persistence-unit>-->
 
-    <persistence-unit name="OracleDB" transaction-type="JTA">
+<!--    <persistence-unit name="PostgreDBLocal">-->
+
+<!--        <class>ru.tn.server.entity.FittingsEntity</class>-->
+<!--        <class>ru.tn.server.entity.TubesEntity</class>-->
+
+<!--        <properties>-->
+<!--            <property name="hibernate.connection.url" value="jdbc:postgresql://10.230.1.105:5432/postgres"/>-->
+<!--            <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>-->
+<!--            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/>-->
+<!--            <property name="hibernate.connection.user" value="scada"/>-->
+<!--            <property name="hibernate.connection.password" value="scada"/>-->
+<!--        </properties>-->
+<!--    </persistence-unit>-->
+
+<!--    <persistence-unit name="OracleDB" transaction-type="JTA">-->
+<!--        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>-->
+<!--        <jta-data-source>jdbc/OracleDataSource</jta-data-source>-->
+
+<!--        <class>ru.tn.server.entity.FittingsEntity</class>-->
+<!--        <class>ru.tn.server.entity.TubesEntity</class>-->
+
+<!--        <properties>-->
+<!--            <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.WeblogicJtaPlatform"/>-->
+<!--            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle12cDialect"/>-->
+<!--        </properties>-->
+<!--    </persistence-unit>-->
+
+    <persistence-unit name="PostgreDB" transaction-type="JTA">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <jta-data-source>jdbc/OracleDataSource</jta-data-source>
+        <jta-data-source>jdbc/PostgreDataSourceScada</jta-data-source>
 
         <class>ru.tn.server.entity.FittingsEntity</class>
         <class>ru.tn.server.entity.TubesEntity</class>
 
         <properties>
             <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.WeblogicJtaPlatform"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle12cDialect"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect"/>
         </properties>
     </persistence-unit>
 </persistence>

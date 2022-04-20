@@ -25,7 +25,7 @@ public class ScadaSB {
 
     private static final Logger LOGGER = Logger.getLogger(ScadaSB.class.getName());
 
-    @PersistenceContext(unitName = "OracleDB")
+    @PersistenceContext(unitName = "PostgreDB")
     private EntityManager em;
 
     public List<TubesEntity> getTubesByBrand(String brand) {

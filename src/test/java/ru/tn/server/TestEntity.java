@@ -12,23 +12,23 @@ import java.time.LocalDateTime;
 public class TestEntity {
 
     public static void main(String[] args) {
-        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("PostgreDBLocal");
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
 
         try {
             transaction.begin();
 
-//            TubesEntity tubes = new TubesEntity();
-//            tubes.setBrand("1");
-//            tubes.setClientId("2");
-//            tubes.setStatus(5L);
-//            tubes.setTimeStamp(LocalDateTime.now());
-//
-//            entityManager.persist(tubes);
+            TubesEntity tubes = new TubesEntity();
+            tubes.setBrand("1");
+            tubes.setClientId("2");
+            tubes.setStatus(5L);
+            tubes.setTimeStamp(LocalDateTime.now());
+
+            entityManager.persist(tubes);
 
             TypedQuery<TubesEntity> tubeByBrandQuery = entityManager.createNamedQuery("TubesEntity.byBrand", TubesEntity.class);
-            tubeByBrandQuery.setParameter(1, "truba60665");
+            tubeByBrandQuery.setParameter(1, "1");
 
             System.out.println(tubeByBrandQuery.getResultList());
             System.out.println(entityManager.find(TubesEntity.class, "1dlWlqP2UvngVbeL9p1YoQ=="));
