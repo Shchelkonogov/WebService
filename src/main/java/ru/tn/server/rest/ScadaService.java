@@ -3,15 +3,19 @@ package ru.tn.server.rest;
 import ru.tn.server.bean.ScadaSB;
 import ru.tn.server.entity.FittingsEntity;
 import ru.tn.server.entity.TubesEntity;
+import ru.tn.server.entity.util.FittingsSerializer;
+import ru.tn.server.entity.util.TubesSerializer;
 
 import javax.ejb.EJB;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,8 +40,13 @@ public class ScadaService {
         List<TubesEntity> tubesByBrand = scadaBean.getTubesByBrand(brand);
         if (!tubesByBrand.isEmpty()) {
             LOGGER.log(Level.INFO, "find tubes {0}", tubesByBrand);
-            Jsonb jsonb = JsonbBuilder.create();
-            return Response.ok(jsonb.toJson(tubesByBrand)).build();
+
+            JsonbConfig config = new JsonbConfig()
+                    .withFormatting(true)
+                    .withSerializers(new TubesSerializer());
+            Jsonb jsonb = JsonbBuilder.create(config);
+
+            return Response.ok(jsonb.toJson(tubesByBrand, new ArrayList<TubesEntity>(){}.getClass().getGenericSuperclass())).build();
         }
 
         LOGGER.log(Level.INFO, "no tubes find for brand {0}", brand);
@@ -53,8 +62,13 @@ public class ScadaService {
         List<FittingsEntity> fittingsByBrand = scadaBean.getFittingsByBrand(brand);
         if (!fittingsByBrand.isEmpty()) {
             LOGGER.log(Level.INFO, "find fitting {0}", fittingsByBrand);
-            Jsonb jsonb = JsonbBuilder.create();
-            return Response.ok(jsonb.toJson(fittingsByBrand)).build();
+
+            JsonbConfig config = new JsonbConfig()
+                    .withFormatting(true)
+                    .withSerializers(new FittingsSerializer());
+            Jsonb jsonb = JsonbBuilder.create(config);
+
+            return Response.ok(jsonb.toJson(fittingsByBrand, new ArrayList<FittingsEntity>(){}.getClass().getGenericSuperclass())).build();
         }
 
         LOGGER.log(Level.INFO, "no fitting find for brand {0}", brand);
