@@ -1,34 +1,30 @@
 package ru.tn.server.model;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Модель данных для подписи объектов пользователя
  */
 @XmlRootElement()
-public class SubscriptModel implements Serializable {
+public class SubscriptModel {
 
-    private String controlId;
+    @XmlElement(name = "controlId")
+    private String clientName;
     private List<Long> muid;
-
-    /**
-     * Конструктор по умолчанию
-     */
-    public SubscriptModel() {
-    }
 
     /**
      * Возвращает пользователя
      * @return пользователь
      */
-    public String getControlId() {
-        return controlId;
+    public String getClientName() {
+        return clientName;
     }
 
-    public void setControlId(String controlId) {
-        this.controlId = controlId;
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 
     /**
@@ -41,5 +37,13 @@ public class SubscriptModel implements Serializable {
 
     public void setMuid(List<Long> muid) {
         this.muid = muid;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SubscriptModel.class.getSimpleName() + "[", "]")
+                .add("clientName='" + clientName + "'")
+                .add("muid=" + muid)
+                .toString();
     }
 }

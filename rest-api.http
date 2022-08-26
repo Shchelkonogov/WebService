@@ -1,0 +1,36 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+
+GET http://localhost:7001/consumers/api/getPassportData?muid=1746997622943317998&objType=1
+
+###
+
+GET http://localhost:7001/consumers/api/statistic
+
+###
+
+GET http://localhost:7001/consumers/api/getHistData?muid=1746997622943317998
+
+###
+
+GET http://localhost:7001/consumers/api/getAsyncRefreshData?muid=1746997622943317998
+
+###
+
+GET http://localhost:7001/consumers/api/getSubs?clientName=MAXTEST
+
+###
+
+POST http://localhost:7001/consumers/api/subscription
+Content-Type: application/json
+
+{
+  "controlId": "MAXTEST",
+  "muid": [1111111111111111,5,3]
+}
+
+###

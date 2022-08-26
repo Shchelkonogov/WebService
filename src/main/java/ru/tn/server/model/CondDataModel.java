@@ -1,27 +1,20 @@
 package ru.tn.server.model;
 
 import javax.json.bind.annotation.JsonbTransient;
-import javax.xml.bind.annotation.XmlTransient;
-import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Модель данных объекта с списком его состояний
  */
-public class CondDataModel implements Serializable {
+public class CondDataModel {
 
     private long muid;
     private List<Integer> cond;
 
-    @XmlTransient
     @JsonbTransient
-    private String maxTimeStamp;
-
-    /**
-     * Конструктор по умолчанию
-     */
-    public CondDataModel() {
-    }
+    private LocalDateTime maxTimeStamp;
 
     /**
      * Конструктор
@@ -29,10 +22,10 @@ public class CondDataModel implements Serializable {
      * @param cond состояния объекта
      * @param maxTimeStamp максимальное время для состояния
      */
-    public CondDataModel(long muid, List<Integer> cond, String maxTimeStamp) {
+    public CondDataModel(long muid, List<Integer> cond, LocalDateTime maxTimeStamp) {
         this.muid = muid;
         this.cond = cond;
-        this.maxTimeStamp = maxTimeStamp;
+        setMaxTimeStamp(maxTimeStamp);
     }
 
     /**
@@ -43,10 +36,6 @@ public class CondDataModel implements Serializable {
         return muid;
     }
 
-    public void setMuid(long muid) {
-        this.muid = muid;
-    }
-
     /**
      * Возвращает состояния объекта
      * @return состояния
@@ -55,21 +44,24 @@ public class CondDataModel implements Serializable {
         return cond;
     }
 
-    public void setCond(List<Integer> cond) {
-        this.cond = cond;
-    }
-
     /**
      * Возвращает максимальное время по состоянию
      * @return время
      */
-    @XmlTransient
-    public String getMaxTimeStamp() {
+    public LocalDateTime getMaxTimeStamp() {
         return maxTimeStamp;
     }
 
-    @XmlTransient
-    public void setMaxTimeStamp(String maxTimeStamp) {
+    private void setMaxTimeStamp(LocalDateTime maxTimeStamp) {
         this.maxTimeStamp = maxTimeStamp;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CondDataModel.class.getSimpleName() + "[", "]")
+                .add("muid=" + muid)
+                .add("cond=" + cond)
+                .add("maxTimeStamp='" + maxTimeStamp + "'")
+                .toString();
     }
 }
