@@ -2,7 +2,7 @@ package ru.tn.server.model;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -13,7 +13,7 @@ public class SubscriptModel {
 
     @XmlElement(name = "controlId")
     private String clientName;
-    private List<Long> muid;
+    private Set<Long> muid;
 
     /**
      * Возвращает пользователя
@@ -31,11 +31,11 @@ public class SubscriptModel {
      * Возвращает объекты пользователя
      * @return объекты
      */
-    public List<Long> getMuid() {
+    public Set<Long> getMuid() {
         return muid;
     }
 
-    public void setMuid(List<Long> muid) {
+    public void setMuid(Set<Long> muid) {
         this.muid = muid;
     }
 
