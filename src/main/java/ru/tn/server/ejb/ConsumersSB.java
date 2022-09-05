@@ -265,7 +265,7 @@ public class ConsumersSB {
                     return result;
                 }
 
-                cond = new ArrayList<>();
+                List<Short> cond = new ArrayList<>();
                 stmCond.setLong(1, item.getMuid());
                 stmCond.setTimestamp(2, Timestamp.valueOf(endTimeStamp));
                 if (item.getStartDate() == null) {
@@ -296,7 +296,7 @@ public class ConsumersSB {
                         }
                     }
 
-                    cond.add((int) Short.parseShort(condValue, 2));
+                    cond.add(Short.parseShort(condValue, 2));
                 }
 
                 if (!cond.isEmpty()) {

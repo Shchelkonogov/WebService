@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 public class CondDataModel {
 
     private long muid;
-    private List<Integer> cond;
+    private List<Short> cond;
 
     @JsonbTransient
     private LocalDateTime maxTimeStamp;
@@ -22,7 +22,7 @@ public class CondDataModel {
      * @param cond состояния объекта
      * @param maxTimeStamp максимальное время для состояния
      */
-    public CondDataModel(long muid, List<Integer> cond, LocalDateTime maxTimeStamp) {
+    public CondDataModel(long muid, List<Short> cond, LocalDateTime maxTimeStamp) {
         this.muid = muid;
         this.cond = cond;
         setMaxTimeStamp(maxTimeStamp);
@@ -40,7 +40,7 @@ public class CondDataModel {
      * Возвращает состояния объекта
      * @return состояния
      */
-    public List<Integer> getCond() {
+    public List<Short> getCond() {
         return cond;
     }
 
