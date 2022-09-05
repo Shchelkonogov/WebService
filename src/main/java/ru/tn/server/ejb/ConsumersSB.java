@@ -92,10 +92,6 @@ public class ConsumersSB {
     @Asynchronous
     public void sendStates(String clientName, String clientPath) {
         logger.log(Level.INFO, "start sending states to {0} {1}", new Object[] {clientName, clientPath});
-//        // TODO Сделано для теста, убрать в продуктиве.
-//        if (!clientName.equals("MAXTEST")) {
-//            return;
-//        }
 
         List<CondDataModel> model = consumersBean.getData(clientName);
         if (!model.isEmpty()) {
@@ -250,7 +246,6 @@ public class ConsumersSB {
                 muid.add(new LoadDataModel(res.getLong(1), (startTimestamp == null ? null : startTimestamp.toLocalDateTime())));
             }
 
-            List<Integer> cond;
             for (LoadDataModel item: muid) {
                 LocalDateTime endTimeStamp = null;
                 stmMaxTimeStamp.setLong(1, item.getMuid());
@@ -262,7 +257,7 @@ public class ConsumersSB {
                 }
 
                 if (endTimeStamp == null) {
-                    return result;
+                    continue;
                 }
 
                 List<Short> cond = new ArrayList<>();
