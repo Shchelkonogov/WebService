@@ -3,6 +3,7 @@ package ru.tn.server.ejb;
 import oracle.jdbc.OracleConnection;
 import ru.tn.server.model.*;
 import ru.tn.server.util.ConsumersException;
+import ru.tn.server.util.Json;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -63,7 +64,7 @@ public class ConsumersSB {
 
     private static final String SEL_CLIENT = "select client_id from iasdtu_clients where client_name = ?";
     private static final String DEL_CLIENT_SUBS = "delete from iasdtu_subscr where client_id = ?";
-    private static final String INS_CLIENT_SUBS = "insert into iasdtu_subscr (client_id, muid)  select * from table(?)";
+    private static final String INS_CLIENT_SUBS = "insert into iasdtu_subscr (client_id, muid) (select * from table(?))";
 
     private static final String UPD_LAST_SEND_CONDITION_DATE = "update IASDTU_SUBSCR set LAST_SEND_CONDITION = ? " +
             "where CLIENT_ID = (select CLIENT_ID from IASDTU_CLIENTS where CLIENT_NAME = ?) and MUID = ?";
@@ -75,6 +76,7 @@ public class ConsumersSB {
     private Logger logger;
 
     @Inject
+    @Json
     private Jsonb jsonb;
 
     @Resource(name = "jdbc/DataSource")

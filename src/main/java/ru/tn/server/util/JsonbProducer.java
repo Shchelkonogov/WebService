@@ -1,5 +1,8 @@
 package ru.tn.server.util;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import javax.enterprise.inject.Produces;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -10,8 +13,15 @@ import javax.json.bind.JsonbBuilder;
 public class JsonbProducer {
 
     @Produces
-    public Jsonb produceJsonb() {
+    @Json()
+    public Jsonb produceWithNotNullValueJsonb() {
         return JsonbBuilder.create();
+    }
+
+    @Produces
+    @Json(withNull = true)
+    public Gson produceWithNullValueJsonb() {
+        return new GsonBuilder().setPrettyPrinting().serializeNulls().create();
     }
 }
 

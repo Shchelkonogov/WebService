@@ -1,11 +1,13 @@
 package ru.tn.server.rest;
 
+import com.google.gson.Gson;
 import ru.tn.server.ejb.ConsumersSB;
 import ru.tn.server.ejb.StatisticSB;
 import ru.tn.server.model.DataModel;
 import ru.tn.server.model.PassportData;
 import ru.tn.server.model.SubscriptModel;
 import ru.tn.server.util.ConsumersException;
+import ru.tn.server.util.Json;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -32,7 +34,12 @@ public class ConsumersService {
     private Logger logger;
 
     @Inject
+    @Json
     private Jsonb jsonb;
+
+    @Inject
+    @Json(withNull = true)
+    private Gson jsonWithNUll;
 
     @EJB
     private ConsumersSB consumersBean;
@@ -92,7 +99,7 @@ public class ConsumersService {
             if (passportData.isEmpty()) {
                 return Response.status(Response.Status.NO_CONTENT).build();
             } else {
-                return Response.ok(jsonb.toJson(passportData)).build();
+                return Response.ok(jsonWithNUll.toJson(passportData)).build();
             }
         } catch (ConsumersException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
