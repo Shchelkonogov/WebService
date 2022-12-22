@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class TimersSB {
 
     private static final String SELECT_CLIENTS = "select client_name, client_path from iasdtu_clients";
-    private static final String DEL_COND_DATA = "delete from iasdtu_data";
+    private static final String DEL_COND_DATA = "truncate table iasdtu_data";
 
     @Inject
     private Logger logger;
