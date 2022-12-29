@@ -21,7 +21,7 @@ public class JsonbProducer {
     @Produces
     @Json(withNull = true)
     public Gson produceWithNullValueJsonb() {
-        return new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+        return new GsonBuilder().serializeNulls().create();
     }
 }
 
