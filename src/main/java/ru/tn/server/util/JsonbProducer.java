@@ -1,5 +1,6 @@
 package ru.tn.server.util;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -21,7 +22,7 @@ public class JsonbProducer {
     @Produces
     @Json(withNull = true)
     public Gson produceWithNullValueJsonb() {
-        return new GsonBuilder().serializeNulls().create();
+        return new GsonBuilder().serializeNulls().setFieldNamingStrategy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
     }
 }
 
