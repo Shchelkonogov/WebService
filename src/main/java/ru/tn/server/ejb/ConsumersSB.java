@@ -17,6 +17,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,11 +39,9 @@ public class ConsumersSB {
 
     private static final String SEL_MUID = "select muid, LAST_SEND_CONDITION from iasdtu_subscr " +
             "where client_id = (select client_id from iasdtu_clients where client_name = ?)";
-    private static final String SEL_MAX_TIME_STAMP = "select max(time_stamp) from iasdtu_data where muid = ?";
-    private static final String SEL_COND = "select cond, decode(val, 'ДА' , 1, 0) " +
+    private static final String SEL_COND = "select cond, decode(val, 'ДА' , 1, 0), TIME_STAMP " +
             "from iasdtu_data a, obj_type_prop_val_vie b " +
             "where muid = ? " +
-            "and time_stamp <= ? " +
             "and TIME_STAMP > ?" +
             "and obj_prop_id = 60 " +
             "and a.obj_id = b.obj_id " +
@@ -237,7 +236,6 @@ public class ConsumersSB {
         List<CondDataModel> result = new ArrayList<>();
         try (Connection connect = ds.getConnection();
              PreparedStatement stm = connect.prepareStatement(SEL_MUID);
-             PreparedStatement stmMaxTimeStamp = connect.prepareStatement(SEL_MAX_TIME_STAMP);
              PreparedStatement stmCond = connect.prepareStatement(SEL_COND)) {
             List<LoadDataModel> muid = new ArrayList<>();
             stm.setString(1, clientName);
@@ -249,27 +247,15 @@ public class ConsumersSB {
             }
 
             for (LoadDataModel item: muid) {
-                LocalDateTime endTimeStamp = null;
-                stmMaxTimeStamp.setLong(1, item.getMuid());
-
-                res = stmMaxTimeStamp.executeQuery();
-                if(res.next()) {
-                    Timestamp timestamp = res.getTimestamp(1);
-                    endTimeStamp = (timestamp == null ? null : res.getTimestamp(1).toLocalDateTime());
-                }
-
-                if (endTimeStamp == null) {
-                    continue;
+                stmCond.setLong(1, item.getMuid());
+                if (item.getStartDate() == null) {
+                    stmCond.setTimestamp(2, Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+                } else {
+                    stmCond.setTimestamp(2, Timestamp.valueOf(item.getStartDate()));
                 }
 
                 List<Short> cond = new ArrayList<>();
-                stmCond.setLong(1, item.getMuid());
-                stmCond.setTimestamp(2, Timestamp.valueOf(endTimeStamp));
-                if (item.getStartDate() == null) {
-                    stmCond.setTimestamp(3, Timestamp.valueOf(endTimeStamp.minusDays(1)));
-                } else {
-                    stmCond.setTimestamp(3, Timestamp.valueOf(item.getStartDate()));
-                }
+                LocalDateTime endTimeStamp = null;
 
                 res = stmCond.executeQuery();
                 while(res.next()) {
@@ -294,6 +280,7 @@ public class ConsumersSB {
                     }
 
                     cond.add(Short.parseShort(condValue, 2));
+                    endTimeStamp = res.getTimestamp(3).toLocalDateTime();
                 }
 
                 if (!cond.isEmpty()) {
