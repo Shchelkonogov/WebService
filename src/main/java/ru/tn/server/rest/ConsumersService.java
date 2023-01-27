@@ -3,6 +3,7 @@ package ru.tn.server.rest;
 import com.google.gson.Gson;
 import ru.tn.server.ejb.ConsumersSB;
 import ru.tn.server.ejb.StatisticSB;
+import ru.tn.server.model.CondDataModel;
 import ru.tn.server.model.DataModel;
 import ru.tn.server.model.PassportData;
 import ru.tn.server.model.SubscriptModel;
@@ -166,6 +167,25 @@ public class ConsumersService {
             }
         } catch (ConsumersException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    /**
+     * Сервис получения последних известных состояний клиента
+     * @param clientName иденификатор клиента
+     * @return список состояний или 204, если состояния не известны
+     */
+    @GET
+    @Path("/getLastStates")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLastStates(@QueryParam("clientName") String clientName) {
+        logger.log(Level.INFO, "request get last states for client {0}", clientName);
+
+        List<CondDataModel> lastStates = consumersBean.getLastStates(clientName);
+        if (lastStates.isEmpty()) {
+            return Response.status(Response.Status.NO_CONTENT).build();
+        } else {
+            return Response.ok(jsonb.toJson(lastStates)).build();
         }
     }
 
