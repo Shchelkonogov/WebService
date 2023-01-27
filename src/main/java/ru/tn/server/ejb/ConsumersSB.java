@@ -19,10 +19,7 @@ import javax.ws.rs.core.Response;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,6 +65,16 @@ public class ConsumersSB {
     private static final String UPD_LAST_SEND_CONDITION_DATE = "update IASDTU_SUBSCR set LAST_SEND_CONDITION = ? " +
             "where CLIENT_ID = (select CLIENT_ID from IASDTU_CLIENTS where CLIENT_NAME = ?) and MUID = ?";
 
+    private static final String SEL_LAST_STATES = "select MUID, COND, decode(val, 'ДА' , 1, 0), TIME_STAMP from IASDTU_LAST_STATE a, OBJ_TYPE_PROP_VAL_VIE b " +
+            "    where MUID in " +
+            "          (select MUID from IASDTU_SUBSCR " +
+            "            where CLIENT_ID = " +
+            "                  (select CLIENT_ID from IASDTU_CLIENTS where CLIENT_NAME = ?)) " +
+            "        and obj_prop_id = 60 " +
+            "        and a.obj_id = b.obj_id";
+
+    private static final String SEL_CLIENT_PATH = "select CLIENT_PATH from IASDTU_CLIENTS where CLIENT_NAME = ?";
+
     private static final String HIST_DATA = "h";
     private static final String INSTANT_DATA = "i";
 
@@ -90,11 +97,50 @@ public class ConsumersSB {
     @EJB
     private StatisticSB statisticBean;
 
-    @Asynchronous
+    /**
+     * Отправка последних известных состояний объектов клиенту
+     * @param clientName идентификатор клиента
+     */
+    public void sendLastStates(String clientName) {
+        try (Connection connect = ds.getConnection();
+             PreparedStatement stm = connect.prepareStatement(SEL_CLIENT_PATH)) {
+            stm.setString(1, clientName);
+            ResultSet res = stm.executeQuery();
+            if (res.next()) {
+                consumersBean.sendStates(clientName, res.getString("client_path"), true);
+            }
+        } catch (SQLException ex) {
+            logger.log(Level.WARNING, "error get client path", ex);
+        }
+    }
+
+    /**
+     * Отправка состояний объектов клиенту
+     * @param clientName идентификатор клиента
+     * @param clientPath адрес куда отправлять
+     */
     public void sendStates(String clientName, String clientPath) {
+        consumersBean.sendStates(clientName, clientPath, false);
+    }
+
+    /**
+     * Отправка состояний объектов клиенту
+     * @param clientName идентификатор клиента
+     * @param clientPath адрес куда отправлять
+     * @param lastStates true - отправить последние известные состояния,
+     *                   false - отправить состояния, которые не были отправлены клиенту
+     */
+    @Asynchronous
+    public void sendStates(String clientName, String clientPath, boolean lastStates) {
         logger.log(Level.INFO, "start sending states to {0} {1}", new Object[] {clientName, clientPath});
 
-        List<CondDataModel> model = consumersBean.getData(clientName);
+        List<CondDataModel> model;
+        if (lastStates) {
+            model = consumersBean.getLastStates(clientName);
+        } else {
+            model = consumersBean.getData(clientName);
+        }
+
         if (!model.isEmpty()) {
             try {
                 logger.log(Level.INFO, "send to {0} {1} states {2}", new Object[]{clientName, clientPath, model});
@@ -172,6 +218,9 @@ public class ConsumersSB {
 
                 stmInsertClientSubs.setArray(1, array);
                 stmInsertClientSubs.executeUpdate();
+
+                // В случае успешной подписи отправляю клиента последние известные состояния его объектов
+                consumersBean.sendLastStates(model.getClientName());
             } else {
                 logger.log(Level.WARNING, "unknown client {0}", model.getClientName());
                 throw new ConsumersException("unknown client " + model.getClientName());
@@ -289,6 +338,50 @@ public class ConsumersSB {
             }
         } catch(SQLException e) {
             logger.log(Level.WARNING, "error load states", e);
+        }
+        return result;
+    }
+
+    /**
+     * Получение списка последних известных состояний клиента
+     * @param clientName идентификатор клиента
+     * @return список состояний
+     */
+    public List<CondDataModel> getLastStates(String clientName) {
+        List<CondDataModel> result = new ArrayList<>();
+        try (Connection connect = ds.getConnection();
+             PreparedStatement stm = connect.prepareStatement(SEL_LAST_STATES)) {
+            stm.setString(1, clientName);
+            ResultSet res = stm.executeQuery();
+            while (res.next()) {
+                String condValue = res.getString(3);
+                switch (res.getInt(2)) {
+                    case 0 : {
+                        condValue = condValue + "0000001";
+                        break;
+                    }
+                    case 1 : {
+                        condValue = condValue + "0000010";
+                        break;
+                    }
+                    case 2 : {
+                        condValue = condValue + "0000100";
+                        break;
+                    }
+                    case 3 : {
+                        condValue = condValue + "0001000";
+                        break;
+                    }
+                }
+
+                result.add(
+                        new CondDataModel(res.getLong(1),
+                                Collections.singletonList(Short.parseShort(condValue, 2)),
+                                res.getTimestamp(4).toLocalDateTime())
+                );
+            }
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "error load last states", e);
         }
         return result;
     }
