@@ -1,21 +1,21 @@
 package ru.tn.server.ejb;
 
-import oracle.jdbc.OracleConnection;
+import jakarta.annotation.Resource;
+import jakarta.ejb.*;
+import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import ru.tn.server.model.*;
 import ru.tn.server.util.ConsumersException;
 import ru.tn.server.util.Json;
 
-import javax.annotation.Resource;
-import javax.ejb.*;
-import javax.inject.Inject;
-import javax.json.bind.Jsonb;
 import javax.sql.DataSource;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,50 +30,49 @@ import java.util.logging.Logger;
 @LocalBean
 public class ConsumersSB {
 
-    private static final String ALTER_SESSION = "alter session set NLS_NUMERIC_CHARACTERS='.,'";
+    private static final String SEL_PASSPORT_DATA = "select prop_name, prop_value, prop_type from iasdtu.get_obj_props(?, ?)";
 
-    private static final String SEL_PASSPORT_DATA = "select prop_name, prop_value, prop_type from table(iasdtu.get_obj_props(?, ?))";
-
-    private static final String SEL_MUID = "select muid, LAST_SEND_CONDITION from iasdtu_subscr " +
-            "where client_id = (select client_id from iasdtu_clients where client_name = ?)";
-    private static final String SEL_COND = "select cond, decode(val, 'ДА' , 1, 0), TIME_STAMP " +
-            "from iasdtu_data a, obj_type_prop_val_vie b " +
+    private static final String SEL_MUID = "select muid, last_send_condition from admin.iasdtu_subscr " +
+            "where client_id = (select client_id from admin.iasdtu_clients where client_name = ?)";
+    private static final String SEL_COND = "select cond, case val when 'ДА' then 1 else 0 end, time_stamp " +
+            "from admin.iasdtu_data a, admin.obj_type_prop_val_vie b " +
             "where muid = ? " +
-            "and TIME_STAMP > ?" +
+            "and time_stamp > ?" +
             "and obj_prop_id = 60 " +
             "and a.obj_id = b.obj_id " +
             "order by time_stamp, id";
 
-    private static final String SQL_STATISTIC = "select get_obj_filial(obj_id), count(*) from obj_object where obj_id in ( " +
-            "select id_aspid from gis_object where id_gis in (select * from table(?))) " +
-            "group by get_obj_filial(obj_id) " +
-            "order by to_number(replace(get_obj_filial(obj_id),'Филиал ',''))";
+    private static final String SQL_STATISTIC = "select admin.get_obj_filial(obj_id), count(*) " +
+            "from admin.obj_object " +
+            "where obj_id in (select id_aspid from admin.gis_object where id_gis = any(?)) " +
+            "group by admin.get_obj_filial(obj_id) " +
+            "order by replace(admin.get_obj_filial(obj_id), 'Филиал ', '')::smallint";
 
-    private static final String SQL_STRING = "select n1, n2, n3, n4, n5 from table(iasdtu.get_hist_data(?))";
-    private static final String SQL_STRING_INST = "select n1, n2, n3, n4, n5 from table(iasdtu.get_async_data(?))";
+    private static final String SQL_STRING = "select n1, n2, n3, n4, n5 from iasdtu.get_hist_data(?)";
+    private static final String SQL_STRING_INST = "select n1, n2, n3, n4, n5 from iasdtu.get_async_data(?)";
 
-    private static final String DEL_SUBS = "delete from iasdtu_subscr " +
-            "where client_id = (select client_id from iasdtu_clients where client_name = ?)";
+    private static final String DEL_SUBS = "delete from admin.iasdtu_subscr " +
+            "where client_id = (select client_id from admin.iasdtu_clients where client_name = ?)";
 
-    private static final String SEL_SUBSCRIPTIONS = "select muid from iasdtu_subscr " +
-            "where client_id = (select client_id from iasdtu_clients where client_name = ?)";
+    private static final String SEL_SUBSCRIPTIONS = "select muid from admin.iasdtu_subscr " +
+            "where client_id = (select client_id from admin.iasdtu_clients where client_name = ?)";
 
-    private static final String SEL_CLIENT = "select client_id from iasdtu_clients where client_name = ?";
-    private static final String DEL_CLIENT_SUBS = "delete from iasdtu_subscr where client_id = ?";
-    private static final String INS_CLIENT_SUBS = "insert into iasdtu_subscr (client_id, muid) (select * from table(?))";
+    private static final String SEL_CLIENT = "select client_id from admin.iasdtu_clients where client_name = ?";
+    private static final String DEL_CLIENT_SUBS = "delete from admin.iasdtu_subscr where client_id = ?";
+    private static final String INS_CLIENT_SUBS = "insert into admin.iasdtu_subscr (client_id, muid) values (?, ?)";
 
-    private static final String UPD_LAST_SEND_CONDITION_DATE = "update IASDTU_SUBSCR set LAST_SEND_CONDITION = ? " +
-            "where CLIENT_ID = (select CLIENT_ID from IASDTU_CLIENTS where CLIENT_NAME = ?) and MUID = ?";
+    private static final String UPD_LAST_SEND_CONDITION_DATE = "update admin.iasdtu_subscr set last_send_condition = ? " +
+            "where client_id = (select client_id from admin.iasdtu_clients where client_name = ?) and muid = ?";
 
-    private static final String SEL_LAST_STATES = "select MUID, COND, decode(val, 'ДА' , 1, 0), TIME_STAMP from IASDTU_LAST_STATE a, OBJ_TYPE_PROP_VAL_VIE b " +
-            "    where MUID in " +
-            "          (select MUID from IASDTU_SUBSCR " +
-            "            where CLIENT_ID = " +
-            "                  (select CLIENT_ID from IASDTU_CLIENTS where CLIENT_NAME = ?)) " +
+    private static final String SEL_LAST_STATES = "select a.muid, a.cond, case val when 'ДА' then 1 else 0 end, a.time_stamp from admin.iasdtu_last_state a, admin.obj_type_prop_val_vie b " +
+            "    where a.muid in " +
+            "          (select muid from admin.iasdtu_subscr " +
+            "            where client_id = " +
+            "                  (select client_id from admin.iasdtu_clients where client_name = ?)) " +
             "        and obj_prop_id = 60 " +
             "        and a.obj_id = b.obj_id";
 
-    private static final String SEL_CLIENT_PATH = "select CLIENT_PATH from IASDTU_CLIENTS where CLIENT_NAME = ?";
+    private static final String SEL_CLIENT_PATH = "select client_path from admin.iasdtu_clients where client_name = ?";
 
     private static final String HIST_DATA = "h";
     private static final String INSTANT_DATA = "i";
@@ -195,7 +194,7 @@ public class ConsumersSB {
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void subscript(SubscriptModel model) throws ConsumersException {
-        try (OracleConnection connect = (OracleConnection) ds.getConnection();
+        try (Connection connect = ds.getConnection();
              PreparedStatement stmGetClient = connect.prepareStatement(SEL_CLIENT);
              PreparedStatement stmDeleteClientSubs = connect.prepareStatement(DEL_CLIENT_SUBS);
              PreparedStatement stmInsertClientSubs = connect.prepareStatement(INS_CLIENT_SUBS)) {
@@ -208,16 +207,14 @@ public class ConsumersSB {
                 stmDeleteClientSubs.setString(1, clientID);
                 stmDeleteClientSubs.executeUpdate();
 
-                List<Struct> muids = new ArrayList<>();
                 for (Long muid: model.getMuid()) {
-                    Object[] o = {clientID, muid};
-                    muids.add(connect.createStruct("T_IASDTU_SUBS_ROW", o));
+                    stmInsertClientSubs.setString(1, clientID);
+                    stmInsertClientSubs.setBigDecimal(2, new BigDecimal(muid));
+
+                    stmInsertClientSubs.addBatch();
                 }
 
-                Array array = connect.createOracleArray("T_IASDTU_SUBS_TAB", muids.toArray());
-
-                stmInsertClientSubs.setArray(1, array);
-                stmInsertClientSubs.executeUpdate();
+                stmInsertClientSubs.executeBatch();
 
                 // В случае успешной подписи отправляю клиента последние известные состояния его объектов
                 consumersBean.sendLastStates(model.getClientName());
@@ -394,14 +391,11 @@ public class ConsumersSB {
      */
     public List<PassportData> getPassportData(long muid, int objType) throws ConsumersException {
         try (Connection connect = ds.getConnection();
-             PreparedStatement alterSession = connect.prepareStatement(ALTER_SESSION);
              PreparedStatement stm = connect.prepareStatement(SEL_PASSPORT_DATA)) {
             List<PassportData> result = new ArrayList<>();
 
-            alterSession.executeQuery();
-
             stm.setLong(1, muid);
-            stm.setInt(2, objType);
+            stm.setLong(2, objType);
 
             ResultSet res = stm.executeQuery();
             while (res.next()) {
@@ -426,11 +420,10 @@ public class ConsumersSB {
      * @return статистика
      */
     public Map<String, String> getStatistic() throws ConsumersException {
-        try (OracleConnection connect = (OracleConnection) ds.getConnection();
+        try (Connection connect = ds.getConnection();
              PreparedStatement stm = connect.prepareStatement(SQL_STATISTIC)) {
             Map<String, String> result = new LinkedHashMap<>();
-
-            stm.setArray(1, connect.createOracleArray("NUM_TABLE", statisticBean.getMuidStatistic().toArray()));
+            stm.setArray(1, connect.createArrayOf("bigint", statisticBean.getMuidStatistic().toArray()));
 
             ResultSet res = stm.executeQuery();
             while (res.next()) {
@@ -458,12 +451,12 @@ public class ConsumersSB {
      * @param muid заданный объект
      * @return список мгновенных данных
      */
-    public List<DataModel> getInst(String muid) throws ConsumersException {
+    public List<DataModel> getInst(long muid) throws ConsumersException {
         List<DataModel> result = new ArrayList<>();
         String id;
         try (Connection connect = ds.getConnection();
              CallableStatement stm = connect.prepareCall("{? = call iasdtu.set_async_request(?)}")) {
-            stm.setString(2, muid);
+            stm.setLong(2, muid);
             stm.registerOutParameter(1, Types.VARCHAR);
             stm.execute();
 
@@ -505,10 +498,7 @@ public class ConsumersSB {
      * @param dataType тип запрашиваемых данных
      */
     private List<DataModel> getData(String muid, String dataType) throws ConsumersException {
-        try (Connection connect = ds.getConnection();
-             PreparedStatement stmAlter = connect.prepareStatement(ALTER_SESSION)) {
-            stmAlter.execute();
-
+        try (Connection connect = ds.getConnection()) {
             PreparedStatement stmData;
             switch (dataType) {
                 case HIST_DATA:

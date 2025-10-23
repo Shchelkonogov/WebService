@@ -1,10 +1,12 @@
 package ru.tn.server.ejb;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.inject.Inject;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,8 +23,8 @@ import java.util.logging.Logger;
 @LocalBean
 public class StatisticSB {
 
-    private Map<String, AtomicInteger> clients = new HashMap<>();
-    private Set<Long> muidStatistic = new HashSet<>();
+    private final Map<String, AtomicInteger> clients = new HashMap<>();
+    private final Set<Long> muidStatistic = new HashSet<>();
 
     @Inject
     private Logger logger;

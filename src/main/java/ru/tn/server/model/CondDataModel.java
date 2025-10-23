@@ -1,17 +1,18 @@
 package ru.tn.server.model;
 
-import javax.json.bind.annotation.JsonbTransient;
+import jakarta.json.bind.annotation.JsonbTransient;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.StringJoiner;
 
 /**
- * Модель данных объекта с списком его состояний
+ * Модель данных объекта со списком его состояний
  */
 public class CondDataModel {
 
-    private long muid;
-    private List<Short> cond;
+    private final long muid;
+    private final List<Short> cond;
 
     @JsonbTransient
     private LocalDateTime maxTimeStamp;

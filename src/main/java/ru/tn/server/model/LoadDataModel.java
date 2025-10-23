@@ -8,8 +8,8 @@ import java.util.StringJoiner;
  */
 public class LoadDataModel {
 
-    private long muid;
-    private LocalDateTime startDate;
+    private final long muid;
+    private final LocalDateTime startDate;
 
     public LoadDataModel(long muid, LocalDateTime startDate) {
         this.muid = muid;

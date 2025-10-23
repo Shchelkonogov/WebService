@@ -1,6 +1,12 @@
 package ru.tn.server.rest;
 
 import com.google.gson.Gson;
+import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import ru.tn.server.ejb.ConsumersSB;
 import ru.tn.server.ejb.StatisticSB;
 import ru.tn.server.model.CondDataModel;
@@ -10,12 +16,6 @@ import ru.tn.server.model.SubscriptModel;
 import ru.tn.server.util.ConsumersException;
 import ru.tn.server.util.Json;
 
-import javax.ejb.EJB;
-import javax.inject.Inject;
-import javax.json.bind.Jsonb;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -111,7 +111,7 @@ public class ConsumersService {
     @Path("/getHistData")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getHistData(@QueryParam("muid") long muid) {
-        logger.log(Level.INFO, "request hist data muid {0}", String.valueOf(muid));
+        logger.log(Level.INFO, "request hist data muid {0}", muid);
 
         statisticBean.addMuidToStatistic(muid);
 
@@ -131,12 +131,12 @@ public class ConsumersService {
     @Path("/getAsyncRefreshData")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getInstantData(@QueryParam("muid") long muid) {
-        logger.log(Level.INFO, "request instant data muid {0}", String.valueOf(muid));
+        logger.log(Level.INFO, "request instant data muid {0}", muid);
 
         statisticBean.addMuidToStatistic(muid);
 
         try {
-            List<DataModel> instData = consumersBean.getInst(String.valueOf(muid));
+            List<DataModel> instData = consumersBean.getInst(muid);
             if (instData.isEmpty()) {
                 return Response.status(Response.Status.NO_CONTENT).build();
             } else {

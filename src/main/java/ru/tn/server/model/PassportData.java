@@ -1,6 +1,7 @@
 package ru.tn.server.model;
 
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbProperty;
+
 import java.util.StringJoiner;
 
 /**
@@ -10,13 +11,13 @@ import java.util.StringJoiner;
 public class PassportData {
 
     @JsonbProperty("Name")
-    private String name;
+    private final String name;
 
     @JsonbProperty("Value")
-    private String value;
+    private final String value;
 
     @JsonbProperty("Type")
-    private String type;
+    private final String type;
 
     public PassportData(String name, String value, String type) {
         this.name = name;

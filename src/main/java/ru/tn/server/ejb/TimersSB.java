@@ -1,8 +1,9 @@
 package ru.tn.server.ejb;
 
-import javax.annotation.Resource;
-import javax.ejb.*;
-import javax.inject.Inject;
+import jakarta.annotation.Resource;
+import jakarta.ejb.*;
+import jakarta.inject.Inject;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,8 +20,8 @@ import java.util.logging.Logger;
 @LocalBean
 public class TimersSB {
 
-    private static final String SELECT_CLIENTS = "select client_name, client_path from iasdtu_clients";
-    private static final String DEL_COND_DATA = "truncate table iasdtu_data";
+    private static final String SELECT_CLIENTS = "select client_name, client_path from admin.iasdtu_clients";
+    private static final String DEL_COND_DATA = "truncate table admin.iasdtu_data";
 
     @Inject
     private Logger logger;

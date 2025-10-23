@@ -1,6 +1,6 @@
 package ru.tn.server.model;
 
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbProperty;
 
 /**
  * Модель данный для json
@@ -8,19 +8,19 @@ import javax.json.bind.annotation.JsonbProperty;
 public class DataModel {
 
     @JsonbProperty("Par_name")
-    private String parMemo;
+    private final String parMemo;
 
     @JsonbProperty("Stat_aggr")
-    private String parDesc;
+    private final String parDesc;
 
     @JsonbProperty("Time_stamp")
-    private String date;
+    private final String date;
 
     @JsonbProperty("Par_value")
-    private String value;
+    private final String value;
 
     @JsonbProperty("Condition")
-    private String cond;
+    private final String cond;
 
     public DataModel(String parMemo, String parDesc, String date, String value, String cond) {
         this.parMemo = parMemo;
