@@ -66,7 +66,7 @@ public class ConsumersSB {
 
     private static final String SEL_LAST_STATES = "select a.muid, a.cond, case val when 'ДА' then 1 else 0 end, a.time_stamp from admin.iasdtu_last_state a, admin.obj_type_prop_val_vie b " +
             "    where a.muid in " +
-            "          (select muid from admin.iasdtu_subscr " +
+            "          (select muid::varchar from admin.iasdtu_subscr " +
             "            where client_id = " +
             "                  (select client_id from admin.iasdtu_clients where client_name = ?)) " +
             "        and obj_prop_id = 60 " +
@@ -447,27 +447,37 @@ public class ConsumersSB {
     }
 
     /**
-     * Получение мгновенных данных по заданному объекту
+     * Формирование запроса для мгновенных данных по заданному объекту
      * @param muid заданный объект
-     * @return список мгновенных данных
+     * @return идентификатор запроса
      */
-    public List<DataModel> getInst(long muid) throws ConsumersException {
-        List<DataModel> result = new ArrayList<>();
-        String id;
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public String requestInstData(long muid) throws ConsumersException {
         try (Connection connect = ds.getConnection();
              CallableStatement stm = connect.prepareCall("{? = call iasdtu.set_async_request(?)}")) {
             stm.setLong(2, muid);
             stm.registerOutParameter(1, Types.VARCHAR);
             stm.execute();
 
-            id = stm.getString(1);
+            return stm.getString(1);
         } catch(SQLException e) {
             logger.log(Level.WARNING, "error async request instant data", e);
             throw new ConsumersException("error async request instant data", e);
         }
+    }
 
-        for (int i = 0; i < 10; i++) {
+    /**
+     * Получение мгновенных данных по заданному объекту
+     * @param id идентификатор запроса
+     * @return список мгновенных данных
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public List<DataModel> getInst(String id) throws ConsumersException {
+        List<DataModel> result = new ArrayList<>();
+
+        for (int i = 0; i < 20; i++) {
             logger.log(Level.INFO, "waiting for instant data {0}мс", String.valueOf(i * 6000));
+            logger.log(Level.INFO, "ID {0}", id);
 
             try {
                 Thread.sleep(6000);
@@ -486,7 +496,7 @@ public class ConsumersSB {
         if (result.isEmpty()) {
             logger.log(Level.WARNING, "timeout waiting instant data");
         } else {
-            logger.log(Level.INFO, "instant data for muid {0} is loaded", muid);
+            logger.log(Level.INFO, "instant data for muid {0} is loaded", id);
         }
 
         return result;

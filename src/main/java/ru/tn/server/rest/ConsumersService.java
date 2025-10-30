@@ -136,7 +136,7 @@ public class ConsumersService {
         statisticBean.addMuidToStatistic(muid);
 
         try {
-            List<DataModel> instData = consumersBean.getInst(muid);
+            List<DataModel> instData = consumersBean.getInst(consumersBean.requestInstData(muid));
             if (instData.isEmpty()) {
                 return Response.status(Response.Status.NO_CONTENT).build();
             } else {
