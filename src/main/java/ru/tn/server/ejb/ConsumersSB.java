@@ -37,7 +37,7 @@ public class ConsumersSB {
     private static final String SEL_COND = "select cond, case val when 'ДА' then 1 else 0 end, time_stamp " +
             "from admin.iasdtu_data a, admin.obj_type_prop_val_vie b " +
             "where muid = ? " +
-            "and time_stamp > ?" +
+            "and time_stamp > ? " +
             "and obj_prop_id = 60 " +
             "and a.obj_id = b.obj_id " +
             "order by time_stamp, id";
